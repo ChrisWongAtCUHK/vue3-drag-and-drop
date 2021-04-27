@@ -10,7 +10,7 @@
 </template>
 
 <script>
-import { computed, inject, ref } from "vue";
+import { computed, inject } from "vue";
 
 export default {
   name: "Draggable",
@@ -18,7 +18,6 @@ export default {
     children: Number,
   },
   setup() {
-    const mouseDown = ref(false);
     const dragging = inject("dragging");
     const left = inject("left");
     const top = inject("top");
@@ -49,7 +48,6 @@ export default {
         event.stopPropagation();
 
         let pageOffset = event.target.getBoundingClientRect();
-        mouseDown.value = true;
 
         updateState({
           originX: event.pageX,

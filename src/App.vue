@@ -6,8 +6,6 @@
         :type="green"
         :index="1"
         :children="1"
-        @onDragStart="onDragStart"
-        @onDragStop="onDragStop"
       />
     </div>
   </div>
@@ -24,10 +22,6 @@ export default {
   },
   setup() {
     const currentDragItem = ref(null);
-    const dragging = reactive({
-      value: false,
-    });
-    provide("dragging", readonly(dragging));
     const state = ref({
       originX: 0,
       originY: 0,
@@ -35,21 +29,34 @@ export default {
       elementY: 0,
     });
 
-    const updateState = (s) => {
-      state.value = { ...s };
-    };
-    provide("updateState", updateState);
-
+    const dragging = reactive({
+      value: false,
+    });
     const left = reactive({
       value: 0,
     });
     const top = reactive({
       value: 0,
     });
-    provide("left", readonly(left));
-    provide("top", readonly(top));
-    let onDragStart = (details) => {
+
+    const updateState = (s) => {
+      state.value = { ...s };
+    };
+
+    const classes = computed(() => {
+      let c = "dnd-example";
+      if (currentDragItem.value) {
+        c += " dragging";
+      }
+      return c;
+    });
+
+    const onDragStart = (details) => {
       currentDragItem.value = details;
+    };
+
+    const onDragStop = () => {
+      currentDragItem.value = null;
     };
 
     const onMouseMove = (event) => {
@@ -75,24 +82,15 @@ export default {
       currentDragItem.value = null;
     };
 
+    provide("dragging", readonly(dragging));
+    provide("updateState", updateState);
+    provide("left", readonly(left));
+    provide("top", readonly(top));
     provide("onMouseMove", onMouseMove);
     provide("onMouseUp", onMouseUp);
 
-    const classes = computed(() => {
-      let c = "dnd-example";
-      if (currentDragItem.value) {
-        c += " dragging";
-      }
-      return c;
-    });
-
-    const onDragStop = () => {
-      currentDragItem.value = null;
-    };
-
     return {
       classes,
-      onDragStart,
       onDragStop,
     };
   },

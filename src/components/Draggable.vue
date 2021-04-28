@@ -15,23 +15,27 @@ import { computed, inject } from "vue";
 export default {
   name: "Draggable",
   props: {
+    type: String,
+    index: Number,
     children: Number,
   },
-  setup() {
+  setup(props) {
     const dragging = inject("dragging");
     const left = inject("left");
     const top = inject("top");
+    const dragData = inject("dragData");
+    const updatedragData = inject("updatedragData");
     const onMouseMove = inject("onMouseMove");
     const onMouseUp = inject("onMouseUp");
     const classes = computed(() => {
       let c = "dnd-draggable";
-      if (dragging.value) {
+      if (dragging.value && dragData?.value.index == props.index) {
         c += " dragging";
       }
       return c;
     });
     const style = computed(() => {
-      if (dragging.value) {
+      if (dragging.value && dragData?.value.index == props.index) {
         return {
           position: "absolute",
           left: left.value + "px",
@@ -55,6 +59,8 @@ export default {
           elementX: pageOffset.left,
           elementY: pageOffset.top,
         });
+
+        updatedragData({ type: props.type, index: props.index });
 
         document.addEventListener("mousemove", onMouseMove);
         document.addEventListener("mouseup", onMouseUp);

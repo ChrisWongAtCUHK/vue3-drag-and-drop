@@ -3,9 +3,35 @@
     <div class="dnd-source-objects">
       <Draggable
         :class="'dnd-source-object green'"
-        :type="green"
+        :type="'green'"
         :index="1"
         :children="1"
+      />
+      <Draggable
+        :class="'dnd-source-object blue'"
+        :type="'blue'"
+        :index="2"
+        :children="2"
+      />
+    </div>
+    <div class="dnd-drop-targets">
+      <DropTarget
+        :accepts="['green']"
+        :index="1"
+        :currentDragItem="currentDragItem"
+        @onDrop="onDrop"
+      />
+      <DropTarget
+        :accepts="['blue']"
+        :index="2"
+        :currentDragItem="currentDragItem"
+        @onDrop="onDrop"
+      />
+      <DropTarget
+        :accepts="['blue', 'green']"
+        :index="2"
+        :currentDragItem="currentDragItem"
+        @onDrop="onDrop"
       />
     </div>
   </div>
@@ -14,11 +40,13 @@
 <script>
 import { computed, provide, reactive, readonly, ref } from "vue";
 import Draggable from "./components/Draggable.vue";
+import DropTarget from "./components/DropTarget.vue";
 
 export default {
   name: "App",
   components: {
     Draggable,
+    DropTarget,
   },
   setup() {
     const currentDragItem = ref(null);
@@ -32,6 +60,12 @@ export default {
     const dragging = reactive({
       value: false,
     });
+    const dragData = reactive({
+      value: {
+        type: "",
+        index: 0,
+      },
+    });
     const left = reactive({
       value: 0,
     });
@@ -41,6 +75,10 @@ export default {
 
     const updateState = (s) => {
       state.value = { ...s };
+    };
+
+    const updatedragData = (dd) => {
+      dragData.value = { ...dd };
     };
 
     const classes = computed(() => {
@@ -66,7 +104,7 @@ export default {
 
       if (!dragging.value && distance > 3) {
         dragging.value = true;
-        onDragStart(true);
+        onDragStart(dragData.value);
       }
 
       if (dragging.value) {
@@ -84,6 +122,8 @@ export default {
 
     provide("dragging", readonly(dragging));
     provide("updateState", updateState);
+    provide("dragData", readonly(dragData));
+    provide("updatedragData", updatedragData);
     provide("left", readonly(left));
     provide("top", readonly(top));
     provide("onMouseMove", onMouseMove);
@@ -91,6 +131,7 @@ export default {
 
     return {
       classes,
+      currentDragItem,
       onDragStop,
     };
   },

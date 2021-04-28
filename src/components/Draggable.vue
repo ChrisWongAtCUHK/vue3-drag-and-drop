@@ -26,10 +26,8 @@ export default {
     const elementY = ref(0);
 
     const dragging = ref(false);
-    const left = ref("left");
-    const top = ref("top");
-    const dragData = inject("dragData");
-    const updatedragData = inject("updatedragData");
+    const left = ref(0);
+    const top = ref(0);
     const onDragStart = inject("onDragStart");
     const onDragStop = inject("onDragStop");
     const classes = computed(() => {
@@ -58,7 +56,7 @@ export default {
 
       if (!dragging.value && distance > 3) {
         dragging.value = true;
-        onDragStart(dragData);
+        onDragStart({ type: props.type, index: props.index });
       }
 
       if (dragging.value) {
@@ -84,8 +82,6 @@ export default {
         originY.value = event.pageY;
         elementX.value = pageOffset.left;
         elementY.value = pageOffset.top;
-
-        updatedragData({ type: props.type, index: props.index });
 
         document.addEventListener("mousemove", onMouseMove);
         document.addEventListener("mouseup", onMouseUp);

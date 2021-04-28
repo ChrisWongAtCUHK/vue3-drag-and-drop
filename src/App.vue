@@ -19,19 +19,19 @@
         :accepts="['green']"
         :index="1"
         :currentDragItem="currentDragItem"
-        @onDrop="onDrop"
+        @onDrop="onDrop($event)"
       />
       <DropTarget
         :accepts="['blue']"
         :index="2"
         :currentDragItem="currentDragItem"
-        @onDrop="onDrop"
+        @onDrop="onDrop($event)"
       />
       <DropTarget
         :accepts="['blue', 'green']"
         :index="2"
         :currentDragItem="currentDragItem"
-        @onDrop="onDrop"
+        @onDrop="onDrop($event)"
       />
     </div>
     <p class="drop-description">{{ dropDescription }}</p>
@@ -50,7 +50,7 @@ export default {
     DropTarget,
   },
   setup() {
-    let currentDragItem = reactive(null);
+    const currentDragItem = ref(null);
     const lastDrop = ref(null);
 
     let dragData = reactive({
@@ -64,7 +64,7 @@ export default {
 
     const classes = computed(() => {
       let c = "dnd-example";
-      if (currentDragItem) {
+      if (currentDragItem.value) {
         c += " dragging";
       }
       return c;
@@ -79,11 +79,18 @@ export default {
     });
 
     const onDragStart = (details) => {
-      currentDragItem = details;
+      currentDragItem.value = details;
     };
 
     const onDragStop = () => {
-      currentDragItem = null;
+      currentDragItem.value = null;
+    };
+
+    const onDrop = (target) => {
+      lastDrop.value = {
+        source: currentDragItem.value,
+        target: target,
+      };
     };
 
     provide("dragData", readonly(dragData));
@@ -95,6 +102,7 @@ export default {
       classes,
       currentDragItem,
       dropDescription,
+      onDrop,
     };
   },
 };

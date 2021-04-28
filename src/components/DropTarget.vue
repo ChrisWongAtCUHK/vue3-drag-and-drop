@@ -1,5 +1,10 @@
 <template>
-  <div :class="classes" @mouseenter="hover = true" @mouseleave="hover = false">
+  <div
+    :class="classes"
+    @mouseenter="hover = true"
+    @mouseleave="hover = false"
+    @mouseup="onDrop"
+  >
     {{ acceptsDescription }}
   </div>
 </template>
@@ -13,7 +18,8 @@ export default {
     accepts: Array,
     currentDragItem: Object,
   },
-  setup(props) {
+  emits: ["onDrop"],
+  setup(props, { emit }) {
     const hover = ref(false);
     const active = () => {
       return (
@@ -28,6 +34,7 @@ export default {
       );
     };
     const classes = computed(() => {
+      console.log(props.currentDragItem);
       return [
         "dnd-drop-target",
         props.accepts.join(" "),
@@ -48,7 +55,11 @@ export default {
       return desc;
     });
 
-    return { hover, classes, acceptsDescription };
+    const onDrop = (event) => {
+      emit("onDrop", event);
+    };
+
+    return { hover, classes, acceptsDescription, onDrop };
   },
 };
 </script>

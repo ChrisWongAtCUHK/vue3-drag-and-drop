@@ -2,34 +2,20 @@
   <div :class="classes">
     <div class="dnd-source-objects">
       <Draggable
-        :class="'dnd-source-object green'"
-        :type="'green'"
-        :index="1"
-        :children="1"
-      />
-      <Draggable
-        :class="'dnd-source-object blue'"
-        :type="'blue'"
-        :index="2"
-        :children="2"
+        v-for="(source, index) in sources"
+        :key="index"
+        :class="`dnd-source-object ${source.type}`"
+        :type="source.type"
+        :index="index"
+        :children="index"
       />
     </div>
     <div class="dnd-drop-targets">
       <DropTarget
-        :accepts="['green']"
-        :index="1"
-        :currentDragItem="currentDragItem"
-        @onDrop="onDrop($event)"
-      />
-      <DropTarget
-        :accepts="['blue']"
-        :index="2"
-        :currentDragItem="currentDragItem"
-        @onDrop="onDrop($event)"
-      />
-      <DropTarget
-        :accepts="['blue', 'green']"
-        :index="3"
+        v-for="(target, index) in targets"
+        :key="index"
+        :accepts="target.accepts"
+        :index="index"
         :currentDragItem="currentDragItem"
         @onDrop="onDrop($event)"
       />
@@ -50,6 +36,20 @@ export default {
     DropTarget,
   },
   setup() {
+    const sources = ref([
+      { type: "green" },
+      { type: "green" },
+      { type: "green" },
+      { type: "blue" },
+      { type: "blue" },
+      { type: "blue" },
+    ]);
+    const targets = ref([
+      { accepts: ["blue"] },
+      { accepts: ["green"] },
+      { accepts: ["blue", "green"] },
+      { accepts: [] },
+    ]);
     const currentDragItem = ref(null);
     const lastDrop = ref(null);
 
@@ -99,6 +99,8 @@ export default {
     provide("onDragStop", onDragStop);
 
     return {
+      sources,
+      targets,
       classes,
       currentDragItem,
       dropDescription,

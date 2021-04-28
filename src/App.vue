@@ -34,6 +34,7 @@
         @onDrop="onDrop"
       />
     </div>
+    <p class="drop-description">{{ dropDescription }}</p>
   </div>
 </template>
 
@@ -49,90 +50,51 @@ export default {
     DropTarget,
   },
   setup() {
-    const currentDragItem = ref(null);
-    const state = ref({
-      originX: 0,
-      originY: 0,
-      elementX: 0,
-      elementY: 0,
-    });
+    let currentDragItem = reactive(null);
+    const lastDrop = ref(null);
 
-    const dragging = reactive({
-      value: false,
+    let dragData = reactive({
+      type: "",
+      index: 0,
     });
-    const dragData = reactive({
-      value: {
-        type: "",
-        index: 0,
-      },
-    });
-    const left = reactive({
-      value: 0,
-    });
-    const top = reactive({
-      value: 0,
-    });
-
-    const updateState = (s) => {
-      state.value = { ...s };
-    };
 
     const updatedragData = (dd) => {
-      dragData.value = { ...dd };
+      dragData = { ...dd };
     };
 
     const classes = computed(() => {
       let c = "dnd-example";
-      if (currentDragItem.value) {
+      if (currentDragItem) {
         c += " dragging";
       }
       return c;
     });
 
+    const dropDescription = computed(() => {
+      if (lastDrop.value) {
+        return `Dropped source ${lastDrop.value.source.type}-${lastDrop.value.source.index} on target ${lastDrop.value.target.index}`;
+      }
+
+      return "";
+    });
+
     const onDragStart = (details) => {
-      currentDragItem.value = details;
+      currentDragItem = details;
     };
 
     const onDragStop = () => {
-      currentDragItem.value = null;
+      currentDragItem = null;
     };
 
-    const onMouseMove = (event) => {
-      let deltaX = event.pageX - state.value.originX;
-      let deltaY = event.pageY - state.value.originY;
-      let distance = Math.abs(deltaX) + Math.abs(deltaY);
-
-      if (!dragging.value && distance > 3) {
-        dragging.value = true;
-        onDragStart(dragData.value);
-      }
-
-      if (dragging.value) {
-        left.value = state.value.elementX + deltaX + document.body.scrollLeft;
-        top.value = state.value.elementY + deltaY + document.body.scrollTop;
-      }
-    };
-
-    const onMouseUp = () => {
-      document.removeEventListener("mousemove", onMouseMove);
-      document.removeEventListener("mouseup", onMouseUp);
-      dragging.value = false;
-      currentDragItem.value = null;
-    };
-
-    provide("dragging", readonly(dragging));
-    provide("updateState", updateState);
     provide("dragData", readonly(dragData));
     provide("updatedragData", updatedragData);
-    provide("left", readonly(left));
-    provide("top", readonly(top));
-    provide("onMouseMove", onMouseMove);
-    provide("onMouseUp", onMouseUp);
+    provide("onDragStart", onDragStart);
+    provide("onDragStop", onDragStop);
 
     return {
       classes,
       currentDragItem,
-      onDragStop,
+      dropDescription,
     };
   },
 };

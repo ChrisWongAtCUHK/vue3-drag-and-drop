@@ -10,7 +10,7 @@
 </template>
 
 <script>
-import { computed, inject } from "vue";
+import { computed, inject, ref } from "vue";
 
 export default {
   name: "Draggable",
@@ -20,22 +20,27 @@ export default {
     children: Number,
   },
   setup(props) {
-    const dragging = inject("dragging");
-    const left = inject("left");
-    const top = inject("top");
+    const originX = ref(0);
+    const originY = ref(0);
+    const elementX = ref(0);
+    const elementY = ref(0);
+
+    const dragging = ref(false);
+    const left = ref("left");
+    const top = ref("top");
     const dragData = inject("dragData");
     const updatedragData = inject("updatedragData");
-    const onMouseMove = inject("onMouseMove");
-    const onMouseUp = inject("onMouseUp");
+    const onDragStart = inject("onDragStart");
+    const onDragStop = inject("onDragStop");
     const classes = computed(() => {
       let c = "dnd-draggable";
-      if (dragging.value && dragData?.value.index == props.index) {
+      if (dragging.value) {
         c += " dragging";
       }
       return c;
     });
     const style = computed(() => {
-      if (dragging.value && dragData?.value.index == props.index) {
+      if (dragging.value) {
         return {
           position: "absolute",
           left: left.value + "px",
@@ -46,19 +51,39 @@ export default {
       }
     });
 
-    const updateState = inject("updateState");
+    const onMouseMove = (event) => {
+      let deltaX = event.pageX - originX.value;
+      let deltaY = event.pageY - originY.value;
+      let distance = Math.abs(deltaX) + Math.abs(deltaY);
+
+      if (!dragging.value && distance > 3) {
+        dragging.value = true;
+        onDragStart(dragData);
+      }
+
+      if (dragging.value) {
+        left.value = elementX.value + deltaX + document.body.scrollLeft;
+        top.value = elementY.value + deltaY + document.body.scrollTop;
+      }
+    };
+
+    const onMouseUp = () => {
+      document.removeEventListener("mousemove", onMouseMove);
+      document.removeEventListener("mouseup", onMouseUp);
+      dragging.value = false;
+      onDragStop();
+    };
+
     const onMouseDown = (event) => {
       if (event.button === 0) {
         event.stopPropagation();
 
         let pageOffset = event.target.getBoundingClientRect();
 
-        updateState({
-          originX: event.pageX,
-          originY: event.pageY,
-          elementX: pageOffset.left,
-          elementY: pageOffset.top,
-        });
+        originX.value = event.pageX;
+        originY.value = event.pageY;
+        elementX.value = pageOffset.left;
+        elementY.value = pageOffset.top;
 
         updatedragData({ type: props.type, index: props.index });
 

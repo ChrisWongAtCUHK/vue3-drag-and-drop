@@ -16,6 +16,7 @@ export default {
   name: "DropTargets",
   props: {
     accepts: Array,
+    index: Number,
     currentDragItem: Object,
   },
   emits: ["onDrop"],
@@ -34,7 +35,6 @@ export default {
       );
     };
     const classes = computed(() => {
-      console.log(props.currentDragItem);
       return [
         "dnd-drop-target",
         props.accepts.join(" "),
@@ -55,8 +55,10 @@ export default {
       return desc;
     });
 
-    const onDrop = (event) => {
-      emit("onDrop", event);
+    const onDrop = () => {
+      if (active()) {
+        emit("onDrop", { index: props.index });
+      }
     };
 
     return { hover, classes, acceptsDescription, onDrop };

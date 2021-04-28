@@ -29,7 +29,7 @@
       />
       <DropTarget
         :accepts="['blue', 'green']"
-        :index="2"
+        :index="3"
         :currentDragItem="currentDragItem"
         @onDrop="onDrop($event)"
       />

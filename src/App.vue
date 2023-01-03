@@ -6,8 +6,8 @@
         :key="index"
         :class="`dnd-source-object ${source.type}`"
         :type="source.type"
-        :index="index"
-        :children="index"
+        :index="index + 1"
+        :children="index + 1"
       />
     </div>
     <div class="dnd-drop-targets">
@@ -15,7 +15,7 @@
         v-for="(target, index) in targets"
         :key="index"
         :accepts="target.accepts"
-        :index="index"
+        :index="index + 1"
         :currentDragItem="currentDragItem"
         @onDrop="onDrop($event)"
       />
